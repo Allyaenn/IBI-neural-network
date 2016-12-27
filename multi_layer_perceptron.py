@@ -8,7 +8,6 @@ nbStep = 2;
 nbLayer = 1;
 learningRate = 0.5;
 
-
 #chargement de la base de données.
 f = gzip.open('mnist.pkl.gz')
 data = pickle.load(f,encoding='latin1')
@@ -21,21 +20,46 @@ data = pickle.load(f,encoding='latin1')
 
 #selection d'une entrée au hasard dans la base
 
+#print (data[0][1][0][0])
+
 vec = data[0][0][0]
-weight = numpy.zeros((vec.size + 1,10))
 vec = numpy.append(vec, 1)
 
-print(weight.size)
+#intialisation de la structure de données
+weight_matrix_list = [nbLayer]
+for i in range (0, nbLayer) :
+    if i == 0 :
+        weight_matrix_list[i] = numpy.zeros((vec.size,10))
+    else :
+        weight_matrix_list[i] = numpy.zeros((11,10))
+#TODO : initialiser les poids de façon random
+
+print ("Weight Matrix List : ")
+print (len(weight_matrix_list))
+
 #on commence avec une seule couche de 10 neurones pour commencer
-out = [10]
+out = numpy.empty((10,1))
 
 for i in range (0,nbStep) : # sur n pas de temps
     for j in range (0,nbLayer) : #pour chaque couche du réseau
         #for k in range (0,10) : #pour chaque neurone de la couche
-            #calcul de la sigmoide
-            calc = numpy.dot(numpy.transpose(weight), vec) #le produit matriciel remplace la somme
-            calc = 1/(1 + numpy.exp(-calc))
-            print(calc)
+            #application de la fonction d'activation
+            #TODO : structuration du calcul en fonction du nombre de couche
+            out = numpy.dot(numpy.transpose(weight_matrix_list[j]), vec) #le produit matriciel remplace la somme
+            out = 1/(1 + numpy.exp(-out))
+            print(out)
+            #attention au biais -> ajouter 1 à la fin du tableau si ce n'est pas la dernière couche
+
+    #calcul de l'erreur pour la couche de sortie
+    tab = numpy.empty(out.shape)
+    print(out.size)
+    print(tab.size)
+    for k in range (0,out.size) :
+        tab[k] = out[k]*(1-out[k])*(data[0][1][0][k]-out[k])
+
+    print (tab)
+
+    #retropropagation des poids
 
 
 #pour n pas de temps
