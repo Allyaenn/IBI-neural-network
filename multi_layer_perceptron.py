@@ -22,6 +22,7 @@ data = pickle.load(f,encoding='latin1')
 print("Base de données chargée.")
 #determination de la taille du vecteur d'entrée
 inputSize = len(data[0][0][0]) + 1
+outputSize = len(data[0][1][0])
 
 #PHASE 1 : APPRENTISSAGE --------------------------------------------------------------------------
 
@@ -29,10 +30,26 @@ inputSize = len(data[0][0][0]) + 1
 #TODO : initialiser les poids de façon random
 weightML = []
 for i in range (0, nbLayer) :
-    if i == 0 :
+    if i == 0 : # premier ensemble de poids, entre entrée et première couche
         weightML.append(numpy.zeros((nbNeurons,inputSize)))
-    else :
+        for j in  range(0, nbNeurons) :
+            for l in range(0, inputSize) :
+                weightML[i][j][l] = random.uniform(-1,1)
+    elif i != nbLayer-1 : #ensemble de poids entre 2 couches cachées
         weightML.append(numpy.zeros((nbNeurons,nbNeurons + 1)))
+        for j in  range(0, nbNeurons) :
+            for l in range(0, nbNeurons) :
+                weightML[i][j][l] = random.uniform(-1,1)
+    else : # ensemble de poids situé entre la dernière couche cachée et la sortie
+        weightML.append(numpy.zeros((outputSize,nbNeurons + 1)))
+        for j in  range(0, outputSize) :
+            for l in range(0, nbNeurons+1) :
+                weightML[i][j][l] = random.uniform(-1,1)
+#plante probablement si il n'ya pas de couches cachées
+
+#Les poids définissant le réseau sont stockés dans une liste de matices de poids. Chaque matrice représente l'ensemble de poids
+# présent entre 2 couches. Une ligne de la matrice contient les poids associés à un neurone cible
+# et chaque colonne contient les poids
 
 #déclaration des structures qui vont stocker les valeurs des neurones
 out = numpy.empty((0,0))
@@ -43,10 +60,10 @@ t1=time.process_time()
 for i in range (0,nbStep) : # sur n pas de temps
     #selection d'une entrée au hasard dans la base d'apprentissage
     randomInt = random.randint(0,len(data[0][0])-1)
-    #print (randomInt)
     vec = data[0][0][randomInt]
-    vec = numpy.append(vec, 1)
-    neuronsVL = []
+    vec = numpy.append(vec, 1) #ajout du biais
+    neuronsVL = [] # création de la structure qui stocke les valeurs des neurones pour un pas de temps
+
     #forward
     for j in range (0,nbLayer) : #pour chaque couche du réseau application de la fonction d'activation
             if j == 0 : #si on est sur la première couche, on prend l'entrée vec
@@ -60,6 +77,7 @@ for i in range (0,nbStep) : # sur n pas de temps
                 out = tmp
             else : #attention au biais -> ajouter 1 à la fin du tableau si ce n'est pas la dernière couche
                 neuronsVL.append(numpy.append(tmp,1))
+
     #backward
     for l in reversed (range(0,nbLayer)) :
         if l == nbLayer-1 :
@@ -71,13 +89,16 @@ for i in range (0,nbStep) : # sur n pas de temps
             #correction des poids liés à la couche de sortie
             weight_old = copy.deepcopy(weightML[l])
             err_old = copy.deepcopy(err)
+            #pour chaque poids, on fait dans une nouvelle matrice le produit (erreur, valeur du neurone à la couche précédente)
             delta = numpy.dot(numpy.reshape(err,(err.size,1)), numpy.transpose(numpy.reshape(neuronsVL[l-1],(neuronsVL[l-1].size,1))))
             weightML[l] = weightML[l] + (delta*learningRate)
 
         else :
             #retropropagation de l'erreur
+            err = numpy.empty((neuronsVL[l].size-1,1))
             for k in range (0,neuronsVL[l].size-1) :
-                som = numpy.dot(numpy.transpose(numpy.reshape(err_old,(err_old.size,1))),numpy.reshape(weight_old[k][:-1],(weight_old[k][:-1].size,1)))
+                #la somme présente dans le calcul de l'erreur propagée est a nouveau remplacé par un produit matriciel
+                som = numpy.dot(numpy.transpose(numpy.reshape(weight_old[:,k],(weight_old[:,k].size,1))),numpy.reshape(err_old,(err_old.size,1)))
                 err[k] = neuronsVL[l][k] * (1 - neuronsVL[l][k]) * som
             #correction poids
             if l != 0 :
@@ -119,5 +140,7 @@ for i in range (0,len(data[1][0])) : #len(data[1][0])
         bonnes_reponses = bonnes_reponses + 1
     #print ("out : " + str(numpy.argmax(out)) + " data : " + str(numpy.argmax(data[1][1][i])))
 
+print (out)
+print (data[1][1][i])
 print ("Taux de bonnes réponses : " + str(bonnes_reponses/reponses*100))
 print ("Phase de test terminée.")

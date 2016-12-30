@@ -2,9 +2,10 @@
 
 TODO :
 - permettre de changer le nombre de neurones par couches
-- ajouter une mesure du temps
 - commenter
-- répondre aux questions
+- question 2
+- question 3
+- question 4
 
 Comment naviguer dans la base de données ?
 - 1ère colonne : test ou apprentissage
