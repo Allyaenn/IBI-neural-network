@@ -1,9 +1,8 @@
 # IBI-neural-network
 
 TODO :
-- rendre le code plus lisible
 - permettre de changer le nombre de neurones par couches
-- créer la partie test (en ajoutant des fonctions)
+- ajouter une mesure du temps
 - commenter
 - répondre aux questions
 
