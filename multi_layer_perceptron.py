@@ -10,7 +10,7 @@ import time
 numpy.set_printoptions(suppress=True)
 
 #paramètrage
-nbStep = 150000; #nombre d'itérations
+nbStep = 125000; #nombre d'itérations
 nbLayer = 3 ; #nombre de couches dans le réseau de neurones (en comptant la couche de sortie)
 nbNeurons = 150; #nombre de neurones par couche
 learningRate = 0.1; #taux d'apprentissage
